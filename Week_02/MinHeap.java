@@ -3,95 +3,108 @@ import java.util.Arrays;
 /**
  * 最小堆
  */
-public class MinHeap {
+public class MinHeap<T extends Comparable<T>> {
+	
+	private Object[] elementData;
+	private int size = 0;
+	private int DEFAULT_CAPACITY = 10;
+	private int capacity = DEFAULT_CAPACITY;
+	
+	public MinHeap() {
+		elementData = new Object[capacity];
+	}
+	
+	public MinHeap(int initCapacity) {
+		if (initCapacity > 0) {
+			elementData = new Object[capacity];
+		} else {
+			throw new IllegalArgumentException("Illegal capacity " + initCapacity);
+		}
+	}
+	
+	public int size() {
+		return size;
+	}
+	
+	public boolean isEmpty() {
+		return size == 0;
+	}
+	
+	public void insert(T value) {
+		if (size == capacity) {
+			grow();
+		}
+		elementData[size] = value;
+		heapifyUp(size);
+		size++;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public T delete() {
+		T top = (T) elementData[0];
+		elementData[0] = elementData[size - 1];
+		size--;
+		heapifyDown();
+		elementData[size] = null;
+		return top;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void heapifyDown() {
+		T temp = (T) elementData[0];
+		int index = 0;
+		int minChildIndex = minChild(index);
+		while(minChildIndex != index) {
+			T child = (T) elementData[minChildIndex];
+			if (temp.compareTo(child) <= 0) {
+				break;
+			}
+			elementData[index] = child;
+			index = minChildIndex;
+			minChildIndex = minChild(index);
 
-    private int size = 0;
-    private int[] elements;
-    private int DEFAULT_CAPACITY = 10;
-    int capacity = 0;
+		}
+		elementData[index] = temp;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private int minChild(int index) {
+		int left = 2 * index + 1;
+		int right = 2 * index + 2;
+		if (left >= size) {
+			return index;
+		} else if (right >= size){
+			return left;
+		} else {
+			return ((T)elementData[left]).compareTo(((T)elementData[right])) < 0 ? left : right;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void heapifyUp(int index) {
+		T temp = (T) elementData[index];
+		
+		while(index > 0) {
+			int parentIndex = parent(index);
+			T parent = (T) elementData[parentIndex];
+			if (temp.compareTo(parent) < 0) {
+				elementData[index] = parent;
+				index = parentIndex;
+			} else {
+				break;
+			}
+		}
+		elementData[index] = temp;
+	}
+	
+	private int parent(int index) {
+		return (index - 1) / 2;
+	}
+	
+	private void grow() {
+		int newCapacity = capacity << 1;
+		elementData = Arrays.copyOf(elementData, newCapacity);
+		capacity = newCapacity;
+	}
 
-    public MinHeap() {
-        this.capacity = DEFAULT_CAPACITY;
-        elements = new int[capacity];
-    }
-
-    public void print() {
-        for (int i = 0; i < size; i++) {
-            System.out.print(elements[i] + " ");
-        }
-    }
-
-    public MinHeap(int capacity) {
-        this.capacity = capacity;
-        elements = new int[capacity];
-    }
-
-    public void insert(int value) {
-        if (size == elements.length) {
-            grow();
-        }
-        elements[size] = value;
-        heapifyUp(size);
-        size++;
-    }
-
-    public int delete() {
-        int top = elements[0];
-        elements[0] = elements[size - 1];
-        heapifyDown(0);
-        size--;
-        return top;
-    }
-
-    private void heapifyDown(int i) {
-        int temp = elements[i];
-
-        while((2 * i + 1) < size) {
-            int minChildIndex = minChild(i);
-            if (elements[minChildIndex] >= temp) {
-                break;
-            }
-            elements[i] = elements[minChildIndex];
-            i = minChildIndex;
-        }
-        elements[i] = temp;
-    }
-
-    private void heapifyUp(int i) {
-        int temp = elements[i];
-        while(i > 0) {
-            int parentIndex = parent(i);
-            if (elements[parentIndex] <= temp) {
-                break;
-            } else {
-                elements[i] = elements[parentIndex];
-                i = parentIndex;
-            }
-        }
-        elements[i] = temp;
-
-    }
-
-    private int parent(int i) {
-        return (i - 1) / 2;
-    }
-
-    private int minChild(int i) {
-        int leftIndex= child(i, 1);
-        int rightIndex = child(i, 2);
-        if (rightIndex >= size) {
-            return leftIndex;
-        }
-        return elements[leftIndex] > elements[rightIndex] ? i * 2 + 2 : i * 2 + 1;
-    }
-
-    private int child(int i, int j) {
-        return 2 * i + j;
-    }
-
-    private void grow() {
-        int newCapacity = capacity << 1;
-        elements = Arrays.copyOf(elements, newCapacity);
-        capacity = newCapacity;
-    }
 }
